@@ -9,10 +9,10 @@ import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.*;
 import org.apache.http.params.*;
 
-public class TransTask implements Runnable {
+public class TransTask implements Callable<String> {
 
 	@Override
-	public void run() {
+	public String call() {
 	    HttpClient objHttp = new DefaultHttpClient();  
 	    HttpParams params = objHttp.getParams();  
 	    HttpConnectionParams.setConnectionTimeout(params, 1000); //接続のタイムアウト  
@@ -35,9 +35,9 @@ public class TransTask implements Runnable {
 	            objStream.close();  
 	        }  
 	    } catch (IOException e) {  
-	    	return;
+	    	return "通信エラー";
 	    }     
-	    return;  
+	    return sReturn; 
 	}
 
 
