@@ -63,6 +63,7 @@ public class MainActivity extends Activity implements OnItemClickListener, MegLi
         		"16. 自動スリープ設定",
         		"17. テキストスクロール",
         		"18. スクロール終了",
+        		"19. たたみっとデモ"
         		};
         
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
@@ -85,7 +86,13 @@ public class MainActivity extends Activity implements OnItemClickListener, MegLi
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 	{
-    	if (position == 0) // 接続
+    	if( position == 19 ){ // たたみっとデモ
+    		// Activity機動
+            Intent serverIntent = new Intent(this, CameraActivity.class);
+            startActivity(serverIntent);
+    	}
+
+    	else if (position == 0) // 接続
     	{
             //Bluetooth接続できるかどうかチェックする
         	//接続できなければ、アプリを終了
