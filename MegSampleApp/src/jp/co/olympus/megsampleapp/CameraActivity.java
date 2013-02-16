@@ -58,8 +58,42 @@ public class CameraActivity extends Activity implements MegListener {
 					String transMessage;
 					transMessage = future.get();
 					message.setText(transMessage);
+					
+					
+		    		//色定義
+		    		final int RED 		= 0xffff0000;
+		    		final int GREEN 	= 0xff00ff00;
+		    		final int BLUE 		= 0xff0000ff;
+		    		final int YELLOW 	= 0xffffff00;
+		    		final int MAGENTA 	= 0xffff00ff;
+		    		final int CYAN 		= 0xff00ffff;
+		    		final int WHITE 	= 0xffffffff;
+		    		final int GRAY      = 0xffcccccc;
+
+		    		//フォントサイズ定義
+		    		final int FONT_HUGE 	= 100;
+		    		final int FONT_LARGE 	= 80;
+		    		final int FONT_MIDDLE 	= 60;
+		    		final int FONT_SMALL 	= 40;
+		    		final int FONT_TINY 	= 20;
+		    		
+		    		//移動量（ピクセル）
+		    		final int SPEED_SLOW = 2;
+		    		final int SPEED_MIDDLE = 6;
+		    		final int SPEED_FAST = 10;
+
 		    		mMegGraphics.begin();
-		    		mMegGraphics.drawString(100, 50,transMessage); // (100, 50)の位置に描画
+	        		int[] sizes4 	= { FONT_LARGE, };
+	        		int[] colors4 	= { RED, }; 
+	        		String[] texts4 	= { transMessage , };
+	        		final int startX4 = 0;
+	        		final int startY4 = 150;
+
+	        		//文字列登録
+	        		mMegGraphics.registerText(0, true, sizes4, colors4, texts4);
+	        		//スクロール設定、スクロール開始
+	        		mMegGraphics.registerScroll(0, startX4, startY4, SPEED_MIDDLE, 50, 2000, 10);
+	        		
 		    		mMegGraphics.end();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
