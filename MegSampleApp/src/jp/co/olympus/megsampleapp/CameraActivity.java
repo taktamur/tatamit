@@ -1,6 +1,8 @@
 package jp.co.olympus.megsampleapp;
 
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -17,12 +19,15 @@ import android.widget.*;
 public class CameraActivity extends Activity implements MegListener {
 	private Button transButton ;
 	private TextView message;
-//	private Handler guiThread;
+	private Handler guiThread;
 	private Meg mMeg; //MEGへのコマンド送信を行うインスタンス
 	private MegGraphics mMegGraphics; // グラフィック描画用
 	private MegListener originalListener;
 	private String transMessage;
 
+	final int INTERVAL_PERIOD = 1000;
+	private Timer timer = new Timer();
+	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,16 +51,22 @@ public class CameraActivity extends Activity implements MegListener {
         // MEGのグラフィックス機能を使うクラスの生成
         mMegGraphics = new MegGraphics(mMeg);
 
-        //        guiThread = new Handler();
+        guiThread = new Handler();
         // ボタンのトリガー設定(後で1秒おきに変更) 
+        
+        timer.scheduleAtFixedRate(new TimerTask(){
+            @Override
+            public void run() {
+				updateMegMessage();
+            }      
+          }, 0, INTERVAL_PERIOD);
         // TODO
-        transButton.setOnClickListener( new OnClickListener() {
+/*        transButton.setOnClickListener( new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				updateMegMessage();
 			}
-		});
+		});*/
     }
 
 	@Override
@@ -124,7 +135,7 @@ public class CameraActivity extends Activity implements MegListener {
 	@Override
 	public void onMegKeyPush(int arg0, int arg1) {
 		// TODO Auto-generated method stub
-		updateMegMessage();
+//		updateMegMessage();
 
 	}
 
@@ -156,8 +167,22 @@ public class CameraActivity extends Activity implements MegListener {
 		TransTask task = new TransTask();
 		Future<String> future = Executors.newSingleThreadExecutor().submit(task);
 		try {
-			transMessage = future.get();
-			message.setText(transMessage);
+			String tmpMessage = future.get();
+			if(tmpMessage == null ){
+				return;
+			}
+			if( tmpMessage.equalsIgnoreCase(transMessage)){
+				return;
+			}
+			transMessage = tmpMessage;
+				
+			guiThread.post(new Runnable() {
+				
+				@Override
+				public void run() {
+					message.setText(transMessage);
+				}
+			});
 			
 			
 			//色定義
@@ -169,6 +194,7 @@ public class CameraActivity extends Activity implements MegListener {
 			final int CYAN 		= 0xff00ffff;
 			final int WHITE 	= 0xffffffff;
 			final int GRAY      = 0xffcccccc;
+			final int BLACK     = 0xff000000;
 
 			//フォントサイズ定義
 			final int FONT_HUGE 	= 100;
@@ -189,11 +215,12 @@ public class CameraActivity extends Activity implements MegListener {
 			mMegGraphics.removeText(textIDs); // 登録したテキストを全削除、registerScrollで登録したものも削除される
 					    		
 			int[] sizes4 	= { FONT_LARGE, };
-			int[] colors4 	= { RED, }; 
+			int[] colors4 	= { WHITE, }; 
 			String[] texts4 	= { transMessage , };
 			final int startX4 = 0;
 			final int startY4 = 150;
 
+			mMegGraphics.setClearColor(BLACK);
 			mMegGraphics.clearScreen();
 			//文字列登録
 			mMegGraphics.registerText(0, true, sizes4, colors4, texts4);

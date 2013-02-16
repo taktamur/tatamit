@@ -35,7 +35,7 @@ public class TransTask implements Callable<String> {
 	            objStream.close();  
 	        }  
 	    } catch (IOException e) {  
-	    	return "’ÊMƒGƒ‰[";
+	    	return null;
 	    }     
 	    return sReturn; 
 	}
