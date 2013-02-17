@@ -111,12 +111,13 @@ public class MainActivity extends Activity implements OnItemClickListener, MegLi
     		}
     		return;
     	}
+    /*
 		if (mMeg == null || !mMeg.isConnected())
 		{
 			Toast.makeText(this, "Ú‘±‚µ‚Ä‚­‚¾‚³‚¢", Toast.LENGTH_LONG).show();
 			return;
 		}
-
+*/
 		// mMeg‚Í”ñnullA‚©‚ÂAÚ‘±Ï‚İ
 		else if (position == 1) // Ø’f
     	{

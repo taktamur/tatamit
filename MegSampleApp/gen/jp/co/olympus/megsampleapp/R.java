@@ -16,6 +16,7 @@ public final class R {
     public static final class id {
         public static final int button_scan=0x7f070007;
         public static final int button_sensor_stop=0x7f070009;
+        public static final int captuer=0x7f07000b;
         public static final int listview=0x7f070002;
         public static final int menu_settings=0x7f07000a;
         public static final int message=0x7f070000;
@@ -35,6 +36,7 @@ public final class R {
     }
     public static final class menu {
         public static final int activity_main=0x7f060000;
+        public static final int camera_menu=0x7f060001;
     }
     public static final class string {
         public static final int app_name=0x7f040000;
@@ -43,6 +45,7 @@ public final class R {
         public static final int bt_disabled=0x7f040009;
         public static final int bt_enabled=0x7f04000a;
         public static final int button_scan=0x7f040006;
+        public static final int capture_cam=0x7f04000d;
         public static final int menu_settings=0x7f040001;
         public static final int none_found=0x7f040005;
         public static final int none_paired=0x7f040004;

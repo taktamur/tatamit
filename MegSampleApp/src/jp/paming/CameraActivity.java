@@ -30,6 +30,9 @@ import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -152,6 +155,26 @@ public class CameraActivity extends Activity implements MegListener {
 			e.printStackTrace();
 		}
 	}
+	
+	   @Override
+	    public boolean onCreateOptionsMenu(Menu menu) {
+
+	        // Inflate our menu which can gather user input for switching camera
+	        MenuInflater inflater = getMenuInflater();
+	        inflater.inflate(R.menu.camera_menu, menu);
+	        return true;
+	    }
+
+	    @Override
+	    public boolean onOptionsItemSelected(MenuItem item) {
+	        // Handle item selection
+	        switch (item.getItemId()) {
+	        case R.id.captuer:
+	        	System.out.println("capture click.");
+	        	break;
+	        }
+	        return true;
+	    }
 	
 	@Override
 	public void onMegAccelChanged(int arg0, int arg1, int arg2) {
