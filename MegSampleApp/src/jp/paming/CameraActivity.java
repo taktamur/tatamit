@@ -81,12 +81,12 @@ public class CameraActivity extends Activity implements MegListener {
         guiThread = new Handler();
         // ボタンのトリガー設定(後で1秒おきに変更) 
         
-//        timer.scheduleAtFixedRate(new TimerTask(){
-//            @Override
-//            public void run() {
-//				updateMegMessage();
-//            }      
-//          }, 0, INTERVAL_PERIOD);
+        timer.scheduleAtFixedRate(new TimerTask(){
+            @Override
+            public void run() {
+				updateMegMessage();
+            }      
+          }, 0, INTERVAL_PERIOD);
 
         
         // Create a RelativeLayout container that will hold a SurfaceView,
