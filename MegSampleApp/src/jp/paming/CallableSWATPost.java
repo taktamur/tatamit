@@ -34,7 +34,7 @@ public class CallableSWATPost implements Callable<InputStream> {
 	    	MultipartEntity entity = new MultipartEntity();
 	    	entity.addPart("application_id",new StringBody("yhd05-i"));
 //	        File file = new File("/Users/tak/Desktop/yhd05_hiyoko2.jpg"); 
-	        entity.addPart("image", new ByteArrayBody(image, "image/jpeg","tatamit2"));
+	        entity.addPart("image", new ByteArrayBody(image, "tatamit2.jpg"));
             post.setEntity(entity);
 
 	        HttpResponse objResponse = objHttp.execute(post);  

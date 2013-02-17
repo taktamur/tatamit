@@ -1,7 +1,12 @@
 package jp.paming;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -24,15 +29,23 @@ import jp.co.olympus.megsampleapp.R.layout;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.CompressFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Size;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -58,6 +71,9 @@ public class CameraActivity extends Activity implements MegListener {
     int cameraCurrentlyLocked;
     // The first rear facing camera
     int defaultCameraId;
+    
+    private int CAMERA_FACING = CameraInfo.CAMERA_FACING_BACK;
+//    private int CAMERA_FACING = CameraInfo.CAMERA_FACING_FRONT;
 
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +121,7 @@ public class CameraActivity extends Activity implements MegListener {
         CameraInfo cameraInfo = new CameraInfo();
             for (int i = 0; i < numberOfCameras; i++) {
                 Camera.getCameraInfo(i, cameraInfo);
-                if (cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK) {
+                if (cameraInfo.facing == CAMERA_FACING) {
                     defaultCameraId = i;
                 }
             }
@@ -171,6 +187,7 @@ public class CameraActivity extends Activity implements MegListener {
 	        switch (item.getItemId()) {
 	        case R.id.captuer:
 	        	System.out.println("capture click.");
+	    		camtureAndTrans();  
 	        	break;
 	        }
 	        return true;
@@ -226,12 +243,31 @@ public class CameraActivity extends Activity implements MegListener {
 
 	@Override
 	public void onMegKeyPush(int arg0, int arg1) {
+//		camtureAndTrans();  
+	}
+	
+	/*	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		 Log.v("MotionEvent", "called.");
+		 camtureAndTrans();  
+		 return true;
+	}
+*/	
+	private void camtureAndTrans() {
 		// カメラ画像を取得
+    	System.gc();
+    	mCamera.setPreviewCallback(null);
+
 		mCamera.takePicture(null, null,new Camera.PictureCallback() {  
 			   public void onPictureTaken(byte[] data,Camera camera) {  
+					 Log.v("onPictureTaken", "called.");
+
 				   updateMegMessage("通信中..");
 					// CallableSWATPostでXML取得
-					CallableSWATPost task = new CallableSWATPost(data);
+				   Log.v("onPictureTaken","original data size="+String.valueOf(data.length));
+				   byte compressJpegByte[] = resizeJpeg(data);	    				
+				   Log.v("onPictureTaken","compressJpegByte size="+String.valueOf(compressJpegByte.length));
+					CallableSWATPost task = new CallableSWATPost(compressJpegByte);
 					Future<InputStream> future = Executors.newSingleThreadExecutor().submit(task);
 					InputStream xml = null;
 						try {
@@ -245,36 +281,81 @@ public class CameraActivity extends Activity implements MegListener {
 						}
 				   
 					// XMLパース
-					String name = null;
-					try {
-						DocumentBuilderFactory document_builder_factory = DocumentBuilderFactory.newInstance();
-						DocumentBuilder document_builder = document_builder_factory.newDocumentBuilder();
-						Document document = document_builder.parse(xml);
-						Element root = document.getDocumentElement();
-						NodeList nodeList = root.getElementsByTagName("name");
-						if( nodeList.getLength()>=1){
-							name = nodeList.item(0).getNodeValue();
-						}
-					} catch (SAXException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ParserConfigurationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					String name = parseSWATXML(xml);
+					   Log.v("onPictureTaken","name="+name);
+
 					// 文字列をMEGに飛ばす
 					if( name != null ){
 						updateMegMessage(name);
 					}else{
-						updateMegMessage("");
+						updateMegMessage("m(_ _)mわかりませんでした");
 					}
+ 				   mCamera.startPreview();
+
 			   }  
-		});  
+		});
 	}
 
+	private byte[] resizeJpeg(byte[] jpegByte) {
+		byte[] compressJpegByte;
+		Bitmap img=null;
+		{
+		   // Bitmap生成、サイズ半分
+		    BitmapFactory.Options opts = new BitmapFactory.Options();
+		    opts.inSampleSize=2; // サイズ半分
+		    img = BitmapFactory.decodeByteArray(jpegByte, 0, jpegByte.length, opts);
+		    ByteArrayOutputStream output = new ByteArrayOutputStream();
+		    img.compress(CompressFormat.JPEG, 80, output);
+		    compressJpegByte = output.toByteArray();
+		   }
+
+	//		File picFile = new File(Environment.getExternalStorageDirectory(),filename);
+//			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//			intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(picFile));
+//			startActivity(intent); 
+		//ローカルファイルへ保存  
+//		try{
+//            //保存ファイル名  
+//            Date today = new Date();  
+//            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");  
+////            values = new ContentValues();  
+//  
+//            //保存するフォルダの作成  
+//            File fileD = new File(Environment.getExternalStorageDirectory().getPath() +  
+//             "/tatamit/");  
+//            if(!fileD.exists()){  
+//                fileD.mkdir();  
+//            }  
+//  
+//            //保存するパスの設定  
+//            String filePath = "/" + getExternalStorageDirectory() + "/" + "tatamit" +   
+//            "/ "+dateFormat.format(today) + ".jpg";  
+////            String filename = dateFormat.format(today)+".jpg";  
+//  
+//            try{  
+//            FileOutputStream fos = new FileOutputStream(filePath,true);  
+//            img.compress(CompressFormat.JPEG, 100, fos);  
+//            fos.flush();  
+//            fos.close(); 
+//            } catch(FileNotFoundException e){  
+//            e.printStackTrace();  
+//            }catch(IOException e){  
+//            e.printStackTrace();  
+//            }  
+		
+		return compressJpegByte;
+	}
+	
+		//SDカードのディレクトリ調査用  
+	public static File getExternalStorageDirectory(){  
+		//外部ストレージが有効か確認  
+		if(!Environment.getExternalStorageState().contains("mounted")){  
+		 return null;  
+		}  
+		//外部ストレージのディレクトリを返す  
+		 return Environment.getExternalStorageDirectory();  
+		} 
+	
 	@Override
 	public void onMegSetContext(int arg0) {
 		// TODO Auto-generated method stub
@@ -300,6 +381,11 @@ public class CameraActivity extends Activity implements MegListener {
 	}
 
 	private void updateMegMessage(String message){
+		updateMegMessage(message,3);
+	}
+
+	private void updateMegMessage(String message,int count){
+		if( mMegGraphics==null ){return;};
 		if( message == null ){return;};
 		//色定義
 		final int RED 		= 0xffff0000;
@@ -341,7 +427,7 @@ public class CameraActivity extends Activity implements MegListener {
 		//文字列登録
 		mMegGraphics.registerText(0, true, sizes4, colors4, texts4);
 		//スクロール設定、スクロール開始
-		mMegGraphics.registerScroll(0, startX4, startY4, SPEED_MIDDLE, 50, 2000, 10);
+		mMegGraphics.registerScroll(0, startX4, startY4, SPEED_MIDDLE, 50, 2000, count);
 		
 		mMegGraphics.end();
 
@@ -376,6 +462,36 @@ public class CameraActivity extends Activity implements MegListener {
 				}
 			});
 			updateMegMessage(transMessage);
+	}
+	private String parseSWATXML(InputStream xml) {
+		String name=null;
+		try {
+			DocumentBuilderFactory document_builder_factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder document_builder = document_builder_factory.newDocumentBuilder();
+			Document document = document_builder.parse(xml);
+			Element root = document.getDocumentElement();
+			NodeList statusList = root.getElementsByTagName("status");
+			if( statusList.getLength()>=1){
+				String status = statusList.item(0).getTextContent();
+				Log.v("parseSWATXML" , "stats="+status);
+				name = status;
+			}
+			NodeList nodeList = root.getElementsByTagName("name");
+			if( nodeList.getLength()>=1){
+				name = nodeList.item(0).getTextContent();
+				Log.v("parseSWATXML", "name="+name);
+			}
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return name;
 	};
 /*	
 	private void guiSetText(final TextView view, final String text){
