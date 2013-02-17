@@ -1,6 +1,7 @@
 package jp.paming;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -80,13 +81,13 @@ public class CameraActivity extends Activity implements MegListener {
 
         guiThread = new Handler();
         // ボタンのトリガー設定(後で1秒おきに変更) 
-        
-        timer.scheduleAtFixedRate(new TimerTask(){
-            @Override
-            public void run() {
-				updateMegMessage();
-            }      
-          }, 0, INTERVAL_PERIOD);
+//        
+//        timer.scheduleAtFixedRate(new TimerTask(){
+//            @Override
+//            public void run() {
+//				updateMegMessage();
+//            }      
+//          }, 0, INTERVAL_PERIOD);
 
         
         // Create a RelativeLayout container that will hold a SurfaceView,
@@ -122,6 +123,7 @@ public class CameraActivity extends Activity implements MegListener {
         mCamera = Camera.open(defaultCameraId);
         cameraCurrentlyLocked = defaultCameraId;
         mPreview.setCamera(mCamera);
+
     }
     @Override
     protected void onPause() {
@@ -204,10 +206,11 @@ public class CameraActivity extends Activity implements MegListener {
 		// カメラ画像を取得
 		mCamera.takePicture(null, null,new Camera.PictureCallback() {  
 			   public void onPictureTaken(byte[] data,Camera camera) {  
+				   updateMegMessage("通信中..");
 					// CallableSWATPostでXML取得
 					CallableSWATPost task = new CallableSWATPost(data);
-					Future<String> future = Executors.newSingleThreadExecutor().submit(task);
-						String xml = null;
+					Future<InputStream> future = Executors.newSingleThreadExecutor().submit(task);
+					InputStream xml = null;
 						try {
 							xml = future.get();
 						} catch (InterruptedException e) {
@@ -223,7 +226,7 @@ public class CameraActivity extends Activity implements MegListener {
 					try {
 						DocumentBuilderFactory document_builder_factory = DocumentBuilderFactory.newInstance();
 						DocumentBuilder document_builder = document_builder_factory.newDocumentBuilder();
-						Document document = document_builder.parse( xml);
+						Document document = document_builder.parse(xml);
 						Element root = document.getDocumentElement();
 						NodeList nodeList = root.getElementsByTagName("name");
 						if( nodeList.getLength()>=1){
@@ -240,7 +243,11 @@ public class CameraActivity extends Activity implements MegListener {
 						e.printStackTrace();
 					}
 					// 文字列をMEGに飛ばす
-					updateMegMessage(name);
+					if( name != null ){
+						updateMegMessage(name);
+					}else{
+						updateMegMessage("");
+					}
 			   }  
 		});  
 	}
@@ -270,6 +277,7 @@ public class CameraActivity extends Activity implements MegListener {
 	}
 
 	private void updateMegMessage(String message){
+		if( message == null ){return;};
 		//色定義
 		final int RED 		= 0xffff0000;
 		final int GREEN 	= 0xff00ff00;
@@ -301,7 +309,7 @@ public class CameraActivity extends Activity implements MegListener {
 				    		
 		int[] sizes4 	= { FONT_LARGE, };
 		int[] colors4 	= { WHITE, }; 
-		String[] texts4 	= { transMessage , };
+		String[] texts4 	= { message , };
 		final int startX4 = 0;
 		final int startY4 = 150;
 

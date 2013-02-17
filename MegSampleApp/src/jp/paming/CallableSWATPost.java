@@ -11,7 +11,7 @@ import org.apache.http.entity.mime.content.*;
 import org.apache.http.impl.client.*;
 import org.apache.http.params.*;
 
-public class CallableSWATPost implements Callable<String> {
+public class CallableSWATPost implements Callable<InputStream> {
 	
 	private byte[] image;
 	public CallableSWATPost(byte [] _images){
@@ -19,7 +19,7 @@ public class CallableSWATPost implements Callable<String> {
 		
 	}
 	@Override
-	public String call() throws Exception {
+	public InputStream call() throws Exception {
 		// TODO Auto-generated method stub
 	    HttpClient objHttp = new DefaultHttpClient();  
 	    HttpParams params = objHttp.getParams();  
@@ -27,18 +27,20 @@ public class CallableSWATPost implements Callable<String> {
 	    HttpConnectionParams.setSoTimeout(params, 30000); //データ取得のタイムアウト  
 	    String xmlStr = ""; 
 	    String sUrl = "http://pbr.gwmj.jp/mucurator/pbrmatching.Servlet"; 
+	    InputStream objStream =null;
 	    try {  
 //	    	HttpClient httpClient = new DefaultHttpClient();
 	    	HttpPost post = new HttpPost(sUrl);
 	    	MultipartEntity entity = new MultipartEntity();
 	    	entity.addPart("application_id",new StringBody("yhd05-i"));
 //	        File file = new File("/Users/tak/Desktop/yhd05_hiyoko2.jpg"); 
-	        entity.addPart("image", new ByteArrayBody(image, "tatamit.jpg"));
+	        entity.addPart("image", new ByteArrayBody(image, "image/jpeg","tatamit2"));
             post.setEntity(entity);
 
 	        HttpResponse objResponse = objHttp.execute(post);  
 	        if (objResponse.getStatusLine().getStatusCode() < 400){  
-	            InputStream objStream = objResponse.getEntity().getContent();  
+	            objStream = objResponse.getEntity().getContent(); 
+	            /*
 	            InputStreamReader objReader = new InputStreamReader(objStream,"UTF-8");  
 	            BufferedReader objBuf = new BufferedReader(objReader,10240);  
 	            StringBuilder xmlStrBuf = new StringBuilder();  
@@ -48,12 +50,13 @@ public class CallableSWATPost implements Callable<String> {
 	            }  
 	            xmlStr = xmlStrBuf.toString();  
 	            objStream.close();  
+	            */
 	        }  
 	    } catch (IOException e) {  
 	    	return null;
 	    }  
 	
-	    return xmlStr; 
+	    return objStream; 
 
 	}
 
