@@ -23,7 +23,6 @@ import jp.co.olympus.meg40.MegListener;
 import jp.co.olympus.meg40.MegGraphics;
 import jp.co.olympus.meg40.BluetoothNotFoundException;
 import jp.co.olympus.meg40.BluetoothNotEnabledException;
-import jp.paming.CameraActivity;
 
 public class MainActivity extends Activity implements OnItemClickListener, MegListener {
 

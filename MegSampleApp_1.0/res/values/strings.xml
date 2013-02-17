@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">ほんやく２</string>
+    <string name="app_name">MegSampleApp</string>
     <string name="menu_settings">Settings</string>
     
     <string name="scanning">Scanning</string>

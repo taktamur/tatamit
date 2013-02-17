@@ -39,7 +39,7 @@
                   android:label="@string/sensor"
                   android:theme="@android:style/Theme.Dialog"
                   android:configChanges="orientation|keyboardHidden" />
-        <activity android:name="jp.paming.CameraActivity"
+        <activity android:name="jp.co.olympus.megsampleapp.CameraActivity"
             android:screenOrientation="landscape" />
         
         </application>
