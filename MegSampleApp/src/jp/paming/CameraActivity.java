@@ -81,12 +81,12 @@ public class CameraActivity extends Activity implements MegListener {
         guiThread = new Handler();
         // ボタンのトリガー設定(後で1秒おきに変更) 
         
-//        timer.scheduleAtFixedRate(new TimerTask(){
-//            @Override
-//            public void run() {
-//				updateMegMessage();
-//            }      
-//          }, 0, INTERVAL_PERIOD);
+        timer.scheduleAtFixedRate(new TimerTask(){
+            @Override
+            public void run() {
+				updateMegMessage();
+            }      
+          }, 0, INTERVAL_PERIOD);
 
         
         // Create a RelativeLayout container that will hold a SurfaceView,
@@ -101,7 +101,7 @@ public class CameraActivity extends Activity implements MegListener {
         CameraInfo cameraInfo = new CameraInfo();
             for (int i = 0; i < numberOfCameras; i++) {
                 Camera.getCameraInfo(i, cameraInfo);
-                if (cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK) {
+                if (cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT) {
                     defaultCameraId = i;
                 }
             }
@@ -202,7 +202,7 @@ public class CameraActivity extends Activity implements MegListener {
 	@Override
 	public void onMegKeyPush(int arg0, int arg1) {
 		// カメラ画像を取得
-		mCamera.takePicture(null, null,new Camera.PictureCallback() {  
+/*		mCamera.takePicture(null, null,new Camera.PictureCallback() {  
 			   public void onPictureTaken(byte[] data,Camera camera) {  
 					// CallableSWATPostでXML取得
 					CallableSWATPost task = new CallableSWATPost(data);
@@ -242,7 +242,7 @@ public class CameraActivity extends Activity implements MegListener {
 					// 文字列をMEGに飛ばす
 					updateMegMessage(name);
 			   }  
-		});  
+		});  */
 	}
 
 	@Override
